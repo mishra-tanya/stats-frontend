@@ -22,8 +22,8 @@ import { ContentType } from "@/types/content";
 import { cn } from "@/lib/utils";
 import {
   WEBSITE_TYPE_CONFIGS,
-  COMMON_TOOLS,
-  SUPPORT_ITEMS,
+  // COMMON_TOOLS,
+  // SUPPORT_ITEMS,
   type SidebarItemConfig,
 } from "./SidebarConfig";
 
@@ -192,7 +192,7 @@ export function EnhancedSidebar({
 
           <SidebarSeparator className="mx-2" />
 
-          <SidebarGroup>
+          {/* <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/90 uppercase tracking-wider mb-3 px-2">
               Tools & Analytics
             </SidebarGroupLabel>
@@ -302,7 +302,7 @@ export function EnhancedSidebar({
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
-          </SidebarGroup>
+          </SidebarGroup> */}
 
           {/* Add some bottom padding to ensure content is not cut off */}
           <div className="h-4" />

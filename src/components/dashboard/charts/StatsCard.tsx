@@ -8,7 +8,7 @@ interface StatsCardProps {
   value: string | number;
   change?: {
     value: number;
-    type: "increase" | "decrease";
+    type?: "increase" | "decrease"|"";
   };
   icon: React.ComponentType<{ className?: string }>;
   description?: string;
@@ -164,7 +164,7 @@ export function StatsCard({
                     : "text-red-600 dark:text-red-400",
                 )}
               >
-                {change.value > 0 ? "+" : ""}
+                { change.type === "increase" ? "+" : "-"}
                 {change.value}%
               </span>
             </div>

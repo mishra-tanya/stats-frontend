@@ -9,6 +9,19 @@ import { RealTimeAnalyticsContent } from "./content/RealTimeAnalytics";
 import { OrdersContent } from "./content/OrdersContent";
 import { Website, DashboardData } from "@/types/dashboard";
 import { ContentType } from "@/types/content";
+import useDashboardData from "@/hooks/useDashboardData";
+import { UsersTable } from "./content/UsersTable";
+import { SubscribedUser } from "./content/SubscribedUser";
+import { CategoryTable } from "./content/BlogCat";
+import { MagazineTable } from "./content/Magazine";
+import { BlogList } from "./content/Blogs";
+import { StatsDashboard } from "./content/db2/StatsDashboard";
+import { StatsDash } from "./content/db4/StatsDash";
+import { UserTable } from "./content/db2/UserTable";
+import { FinanceEmissionTable } from "./content/db4/FinanceEmission";
+import { RegistrationChartWrapper } from "./content/db4/RegChart";
+import { EmissionChartWrapper } from "./content/db4/EmissionChart";
+import CountryPieChartWrapper from "./content/db2/CountryPie";
 
 // Mock data for different website types
 const mockWebsites: Website[] = [
@@ -287,9 +300,14 @@ export function DashboardLayout() {
     mockWebsites[0],
   );
   const [activeContent, setActiveContent] = useState<ContentType>("dashboard");
-  const dashboardData = generateMockData(selectedWebsite.type);
+  // const dashboardData = generateMockData(selectedWebsite.type);
+  const { data: dashboardData, loading, error } = useDashboardData(selectedWebsite.type);
 
   const renderContent = () => {
+     if (loading) return <div className="p-6">Loading stats...</div>;
+      if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
+      if (!dashboardData) return <div className="p-6">No data available.</div>;
+
     switch (activeContent) {
       case "dashboard":
         return (
@@ -298,12 +316,30 @@ export function DashboardLayout() {
             data={dashboardData}
           />
         );
-      case "analytics-overview":
-        return <AnalyticsOverviewContent />;
-      case "analytics-realtime":
-        return <RealTimeAnalyticsContent />;
-      case "ecommerce-orders":
-        return <OrdersContent />;
+      case "analytics-users-db1":
+        return <UsersTable />;
+      case "analytics-subscribed-db1":
+        return <SubscribedUser />;
+      case "analytics-blogCat":
+        return <CategoryTable />;
+      case "analytics-magazines":
+        return <MagazineTable />;
+      case "analytics-blogs":
+        return <BlogList />;
+      case "dashboard-db2":
+        return <StatsDashboard />;
+      case "dashboard-db4":
+        return <StatsDash />;
+      case "db4-users":
+        return <UserTable/>
+      case "db4-emission":
+        return <FinanceEmissionTable/>
+      case "db4-trackReg":
+        return <RegistrationChartWrapper/>
+      case "db4-trackEmission":
+        return <EmissionChartWrapper/>
+      case "db2-CountryChart":
+        return <CountryPieChartWrapper/>
       default:
         return <PlaceholderContent contentType={activeContent} />;
     }

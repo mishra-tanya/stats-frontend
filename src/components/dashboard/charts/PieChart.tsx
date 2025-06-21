@@ -101,7 +101,7 @@ export function DashboardPieChart({
       </CardHeader>
 
       <CardContent className="relative z-10">
-        <ChartContainer config={chartConfig} className="h-[350px]">
+        <ChartContainer config={chartConfig} className="h-[500px]">
           <PieChart>
             <ChartTooltip
               content={<ChartTooltipContent nameKey="name" hideLabel />}
@@ -109,7 +109,7 @@ export function DashboardPieChart({
             <Pie
               dataKey="value"
               data={data}
-              innerRadius={60}
+              innerRadius={140}
               strokeWidth={3}
               stroke="hsl(var(--background))"
             >
@@ -121,10 +121,6 @@ export function DashboardPieChart({
                 />
               ))}
             </Pie>
-            <ChartLegend
-              content={<ChartLegendContent nameKey="name" />}
-              className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
-            />
           </PieChart>
         </ChartContainer>
       </CardContent>

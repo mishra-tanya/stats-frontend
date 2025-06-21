@@ -33,26 +33,17 @@ const Index = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-              <Link to="/dashboard">
+              <Link to="/login">
                 <Button
                   size="lg"
                   className="gap-3 h-14 px-8 text-lg bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                 >
-                  Get Started Free
+                  Get Started
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
 
-              <Link to="/login">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="gap-3 h-14 px-8 text-lg border-2 border-dashed border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all duration-300"
-                >
-                  <LogIn className="h-5 w-5" />
-                  Sign In
-                </Button>
-              </Link>
+              
             </div>
 
             </div>

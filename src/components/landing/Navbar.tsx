@@ -104,19 +104,7 @@ export function LandingNavbar() {
               </NavigationMenuList>
             </NavigationMenu>
 
-            <Link
-              to="/dashboard"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Dashboard
-            </Link>
-
-            <Link
-              to="#about"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              About
-            </Link>
+           
           </div>
 
           {/* Desktop Actions */}
@@ -130,11 +118,7 @@ export function LandingNavbar() {
                 Sign In
               </Button>
             </Link>
-            <Link to="/dashboard">
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-                Get Started
-              </Button>
-            </Link>
+           
           </div>
 
           {/* Mobile Menu Button */}
