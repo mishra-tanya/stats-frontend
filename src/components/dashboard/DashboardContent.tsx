@@ -1,12 +1,36 @@
-import { Users, DollarSign, Eye, TrendingUp, MessageCircleCodeIcon, Book } from "lucide-react";
+import {
+  Users,
+  DollarSign,
+  Eye,
+  TrendingUp,
+  MessageCircle,
+  BookOpen,
+  ScrollText,
+  Star,
+  BarChart,
+  CalendarCheck,
+  ClipboardList,
+  LayoutDashboard,
+  FileText,
+  Folder,
+  Newspaper,
+} from "lucide-react";
 
 import { StatsCard } from "./charts/StatsCard";
 import { Website } from "@/types/dashboard";
 
 interface DashboardContentProps {
   selectedWebsite: Website;
-  data: any; 
+  data: any;
 }
+
+// Safely extract primitive value (or fallback)
+const getStatValue = (input: any): number | string => {
+  if (input && typeof input === "object" && "value" in input) {
+    return input.value;
+  }
+  return input ?? 0;
+};
 
 export function DashboardContent({
   selectedWebsite,
@@ -24,219 +48,58 @@ export function DashboardContent({
         </h2>
         <p className="text-muted-foreground text-lg mt-2">
           Analytics and insights for your{" "}
-          <span className="font-semibold text-foreground capitalize">
-            {type}
-          </span>{" "}
-          website
+          <span className="font-semibold text-foreground capitalize">{type}</span> website
         </p>
       </div>
 
-      {/* Dynamic Stats Cards */}
+      {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {type === "analytics" && (
           <>
-            <StatsCard
-              title="Registered Users"
-              value={data.registered_users}
-              icon={Users}
-              description="Total active users"
-              colorScheme="blue"
-            />
-            <StatsCard
-              title="Blog Posts"
-              value={data.blog_count}
-              icon={Eye}
-              description="Total blogs published"
-              colorScheme="green"
-            />
-            <StatsCard
-              title="Subscriptions"
-              value={data.subscriptions_count}
-              icon={DollarSign}
-              description="Active subscriptions"
-              colorScheme="purple"
-            />
-            <StatsCard
-              title="Categories"
-              value={data.categories_count}
-              icon={TrendingUp}
-              description="Blog categories"
-              colorScheme="orange"
-            />
-             <StatsCard
-              title="Magazines"
-              value={data.magazines_count}
-              icon={TrendingUp}
-              description="Total Magazines"
-              colorScheme="pink"
-            />
+            <StatsCard title="Registered Users" value={getStatValue(data.registered_users)} icon={Users} description="All signed up users" colorScheme="blue" />
+            <StatsCard title="Blog Posts" value={getStatValue(data.blog_count)} icon={FileText} description="Published blogs" colorScheme="green" />
+            <StatsCard title="Subscriptions" value={getStatValue(data.subscriptions_count)} icon={Star} description="Ongoing plans" colorScheme="purple" />
+            <StatsCard title="Categories" value={getStatValue(data.categories_count)} icon={Folder} description="Content categories" colorScheme="orange" />
+            <StatsCard title="Magazines" value={getStatValue(data.magazines_count)} icon={Newspaper} description="Uploaded issues" colorScheme="pink" />
           </>
         )}
 
         {type === "scr" && (
           <>
-         <StatsCard
-              title="Registered Users"
-              value={data.registered_users?.value}
-              change={data.registered_users?.change}
-              icon={Users}
-              description="Total SCR users"
-              colorScheme="blue"
-            />
-            <StatsCard
-              title="Contact Messages"
-              value={data.contact_messages?.value}
-              change={data.contact_messages?.change}
-              icon={MessageCircleCodeIcon}
-              description="Total contact messages"
-              colorScheme="green"
-            />
-            <StatsCard
-              title="Results"
-              value={data.results?.value}
-              change={data.results?.change}
-              icon={TrendingUp}
-              description="Test results submitted"
-              colorScheme="orange"
-            />
-            <StatsCard
-              title="Learning Objective Results"
-              value={data.learning_obj_result?.value}
-              change={data.learning_obj_result?.change}
-              icon={TrendingUp}
-              description="Learning Obj results submitted"
-              colorScheme="cyan"
-            />
-            <StatsCard
-              title="Revenue"
-              value={data.paid_user*4000}
-              icon={TrendingUp}
-              description="Total Revenue"
-              colorScheme="green"
-            />
-             <StatsCard
-              title="Paid Users"
-              value={data.paid_user}
-              icon={TrendingUp}
-              description="Total paid users"
-              colorScheme="pink"
-            />
-             <StatsCard
-              title="Verified Users"
-              value={data.verified_user}
-              icon={TrendingUp}
-              description="Total verified users"
-              colorScheme="orange"
-            />
-            <StatsCard
-              title="Trial Requests"
-              value={data.trial_request}
-              icon={TrendingUp}
-              description="Total Trial Requests"
-              colorScheme="green"
-            />
-            <StatsCard
-              title="SCR Questions"
-              value={data.scr_question}
-              icon={Book}
-              description="Total SCR questions"
-              colorScheme="pink"
-            />
-            <StatsCard
-              title="Flash Questions"
-              value={data.flash_question}
-              icon={Eye}
-              description="Total flash questions"
-              colorScheme="green"
-            />
-            <StatsCard
-              title="Learning Obj. Questions"
-              value={data.learning_obj_question}
-              icon={DollarSign}
-              description="Questions mapped to LOs"
-              colorScheme="purple"
-            />
-          
+            <StatsCard title="Registered Users" value={getStatValue(data.registered_users)} change={data.registered_users?.change} icon={Users} description="SCR platform users" colorScheme="blue" />
+            <StatsCard title="Contact Messages" value={getStatValue(data.contact_messages)} change={data.contact_messages?.change} icon={MessageCircle} description="User queries" colorScheme="cyan" />
+            <StatsCard title="Results" value={getStatValue(data.results)} change={data.results?.change} icon={TrendingUp} description="Test outcomes" colorScheme="orange" />
+            <StatsCard title="Learning Obj. Results" value={getStatValue(data.learning_obj_result)} change={data.learning_obj_result?.change} icon={ClipboardList} description="LO-based responses" colorScheme="green" />
+            <StatsCard title="Revenue" value={getStatValue(data.paid_user) * 4000} icon={DollarSign} description="Total earnings" colorScheme="purple" />
+            <StatsCard title="Paid Users" value={getStatValue(data.paid_user)} icon={Star} description="Subscribed users" colorScheme="pink" />
+            <StatsCard title="Verified Users" value={getStatValue(data.verified_user)} icon={LayoutDashboard} description="Email verified" colorScheme="orange" />
+            <StatsCard title="Trial Requests" value={getStatValue(data.trial_request)} icon={CalendarCheck} description="Trial signups" colorScheme="green" />
+            <StatsCard title="SCR Questions" value={getStatValue(data.scr_question)} icon={ScrollText} description="SCR test items" colorScheme="blue" />
+            <StatsCard title="Flash Questions" value={getStatValue(data.flash_question)} icon={Eye} description="Quick questions" colorScheme="cyan" />
+            <StatsCard title="Learning Obj. Questions" value={getStatValue(data.learning_obj_question)} icon={BookOpen} description="LO-linked questions" colorScheme="purple" />
           </>
         )}
 
         {type === "olympiad" && (
-          <StatsCard
-            title="Dashboard"
-            value="N/A"
-            change={{ value: 0, type: "increase" }}
-            icon={Users}
-            description="Waiting for data..."
-            colorScheme="cyan"
-          />
+          <>
+            <StatsCard title="Registered Users" value={getStatValue(data.registered_users)} change={data.registered_users?.change} icon={Users} description="Olympiad participants" colorScheme="green" />
+            <StatsCard title="Contact Messages" value={getStatValue(data.contact_messages)} change={data.contact_messages?.change} icon={MessageCircle} description="User messages" colorScheme="blue" />
+            <StatsCard title="Payments" value={getStatValue(data.payments)} change={data.payments?.change} icon={DollarSign} description="Payment records" colorScheme="purple" />
+            <StatsCard title="Goals Created" value={getStatValue(data.goal)} icon={TrendingUp} description="Custom goals" colorScheme="orange" />
+            <StatsCard title="Total Revenue" value={getStatValue(data.total_revenue)} change={data.total_revenue?.change} icon={BarChart} description="Overall revenue" colorScheme="cyan" />
+            <StatsCard title="Results" value={getStatValue(data.results)} change={data.results?.change} icon={TrendingUp} description="Submitted results" colorScheme="green" />
+            <StatsCard title="Goal Tests" value={getStatValue(data.goal_test)} icon={ClipboardList} description="Tests by goals" colorScheme="pink" />
+            <StatsCard title="Question Bank" value={getStatValue(data.test_question)} icon={ScrollText} description="Question inventory" colorScheme="blue" />
+          </>
         )}
 
-         {type === "computation" && (
-         <>
-          <StatsCard
-            title="Registered User"
-            value={data.registered_users}
-            change={{ value: 0, type: "increase" }}
-            icon={Users}
-            description="Total Registered Users"
-            colorScheme="green"
-          />
-            <StatsCard
-            title="Finance Emissions"
-            value={data.financed_emission}
-            change={{ value: 0, type: "increase" }}
-            icon={Users}
-            description="Total Emissions"
-            colorScheme="cyan"
-          />
-         </>
+        {type === "computation" && (
+          <>
+            <StatsCard title="Registered Users" value={getStatValue(data.registered_users)} change={data.registered_users?.change} icon={Users} description="Platform users" colorScheme="green" />
+            <StatsCard title="Finance Emissions" value={getStatValue(data.financed_emission)} change={data.financed_emission?.change} icon={BarChart} description="Emission computations" colorScheme="cyan" />
+          </>
         )}
       </div>
-
-      {/* {type === "olympiad" || type === "scr" ? (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <DashboardAreaChart
-            data={[]} 
-            title="Traffic Overview"
-            description="Users and engagement trends"
-          />
-          <DashboardPieChart
-            data={[
-              { name: "Desktop", value: 45, fill: "hsl(var(--chart-1))" },
-              { name: "Mobile", value: 35, fill: "hsl(var(--chart-2))" },
-              { name: "Tablet", value: 15, fill: "hsl(var(--chart-3))" },
-              { name: "Other", value: 5, fill: "hsl(var(--chart-4))" },
-            ]}
-            title="Traffic Sources"
-            description="Breakdown of device usage"
-          />
-        </div>
-      ) : null}
-
-      {type === "olympiad" && (
-        <DataTable
-          data={[
-            {
-              id: "1",
-              page: "/scr/module1",
-              views: 5000,
-              users: 1200,
-              bounceRate: 30,
-              avgTime: "3:40",
-            },
-            {
-              id: "2",
-              page: "/scr/module2",
-              views: 4200,
-              users: 1000,
-              bounceRate: 25,
-              avgTime: "4:10",
-            },
-          ]}
-          title="Top Modules"
-          description="Most engaged SCR modules"
-        />
-      )} */}
     </div>
   );
 }

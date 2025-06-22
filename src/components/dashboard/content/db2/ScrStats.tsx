@@ -11,9 +11,11 @@ const ranges = [
   { label: "1 Year", value: "365" },
 ];
 
-export function RegistrationChartWrapper() {
+export function SCRStats() {
   const [range, setRange] = useState("7");
-  const { data, loading, error } = useFetch<any>(`db4/registration-stats?range=${range}`);
+
+  const endpoint = `db2/scr-stats?range=${range}`;
+  const { data, loading, error } = useFetch<any[]>(endpoint);
 
   return (
     <div className="p-4">
@@ -29,15 +31,16 @@ export function RegistrationChartWrapper() {
         ))}
       </select>
 
-      {loading && <p>Loading...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {!loading && !error && data && (
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">Error: {error}</p>
+      ) : (
         <DashboardAreaChart
-          data={data}
-          title="User Registration"
-          description={`Emissions recorded over the last ${range} days`}
           range={range}
+          data={data || []}
+          title="SCR Results"
+          description={`Showing registrations over the last ${range} day(s)`}
         />
       )}
     </div>

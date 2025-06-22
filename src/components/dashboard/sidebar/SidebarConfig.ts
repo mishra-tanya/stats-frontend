@@ -154,7 +154,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "Track Registration",
-            contentId: "ecommerce-orders" as ContentType,
+            contentId: "db2-reg-track" as ContentType,
             icon: ShoppingCart,
             color: "text-green-600 dark:text-green-400",
             bgColor: "bg-green-50 dark:bg-green-950/50",
@@ -170,7 +170,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
            {
             title: "Track SCR Results",
-            contentId: "ecommerce-inventory" as ContentType,
+            contentId: "db2-scr-stats" as ContentType,
             icon: Database,
             color: "text-red-600 dark:text-red-400",
             bgColor: "bg-red-50 dark:bg-red-950/50",
@@ -178,7 +178,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
            {
             title: "Track Learning Obj Results",
-            contentId: "ecommerce-inventory" as ContentType,
+            contentId: "db2-lo-stats" as ContentType,
             icon: Database,
             color: "text-red-600 dark:text-red-400",
             bgColor: "bg-red-50 dark:bg-red-950/50",
@@ -191,7 +191,15 @@ export const WEBSITE_TYPE_CONFIGS = {
         items: [
           {
             title: "All Users",
-            contentId: "ecommerce-revenue" as ContentType,
+            contentId: "db2-usertable" as ContentType,
+            icon: DollarSign,
+            color: "text-emerald-600 dark:text-emerald-400",
+            bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
+            description: "Sales performance",
+          },
+           {
+            title: "All Contact Messages",
+            contentId: "db2-contact" as ContentType,
             icon: DollarSign,
             color: "text-emerald-600 dark:text-emerald-400",
             bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
@@ -199,7 +207,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "Learning Obj Questions",
-            contentId: "ecommerce-customers" as ContentType,
+            contentId: "db2-lo" as ContentType,
             icon: Users,
             color: "text-purple-600 dark:text-purple-400",
             bgColor: "bg-purple-50 dark:bg-purple-950/50",
@@ -207,7 +215,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "SCR Questions",
-            contentId: "ecommerce-promotions" as ContentType,
+            contentId: "db2-scr" as ContentType,
             icon: Tag,
             color: "text-orange-600 dark:text-orange-400",
             bgColor: "bg-orange-50 dark:bg-orange-950/50",
@@ -215,7 +223,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "Flash Titles",
-            contentId: "ecommerce-marketing" as ContentType,
+            contentId: "db2-flash" as ContentType,
             icon: Megaphone,
             color: "text-pink-600 dark:text-pink-400",
             bgColor: "bg-pink-50 dark:bg-pink-950/50",
@@ -223,7 +231,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "Flash Questions",
-            contentId: "ecommerce-marketing" as ContentType,
+            contentId: "db2-flash-question" as ContentType,
             icon: Megaphone,
             color: "text-pink-600 dark:text-pink-400",
             bgColor: "bg-pink-50 dark:bg-pink-950/50",
@@ -231,7 +239,7 @@ export const WEBSITE_TYPE_CONFIGS = {
           },
           {
             title: "Notes",
-            contentId: "ecommerce-marketing" as ContentType,
+            contentId: "db2-note" as ContentType,
             icon: Megaphone,
             color: "text-pink-600 dark:text-pink-400",
             bgColor: "bg-pink-50 dark:bg-pink-950/50",

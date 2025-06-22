@@ -17,11 +17,21 @@ import { MagazineTable } from "./content/Magazine";
 import { BlogList } from "./content/Blogs";
 import { StatsDashboard } from "./content/db2/StatsDashboard";
 import { StatsDash } from "./content/db4/StatsDash";
-import { UserTable } from "./content/db2/UserTable";
+import { UserTable } from "./content/db4/UserTable";
 import { FinanceEmissionTable } from "./content/db4/FinanceEmission";
 import { RegistrationChartWrapper } from "./content/db4/RegChart";
 import { EmissionChartWrapper } from "./content/db4/EmissionChart";
 import CountryPieChartWrapper from "./content/db2/CountryPie";
+import { UserTableDb2 } from "./content/db2/UserTableDb2";
+import LoQuestionPage from "@/pages/analytics/LoQuesPage";
+import QuestionPage from "@/pages/analytics/ScrQuesPage";
+import { FlashTable } from "./content/db2/FlashTable";
+import FlashcardPage from "@/pages/analytics/FlashCardList";
+import { ChapterListPage } from "@/pages/analytics/ChapterListPage";
+import { RegistrationDb2Wrapper } from "./content/db2/RegTrack";
+import { LoStats } from "./content/db2/LoStats";
+import { SCRStats } from "./content/db2/ScrStats";
+import { ContactMessageTable } from "./content/db2/Contact";
 
 // Mock data for different website types
 const mockWebsites: Website[] = [
@@ -37,12 +47,12 @@ const mockWebsites: Website[] = [
     type: "scr",
     color: "#10b981",
   },
-  {
-    id: "3",
-    name: "Sustainability Olympiad",
-    type: "olympiad",
-    color: "#f59e0b",
-  },
+  // {
+  //   id: "3",
+  //   name: "Sustainability Olympiad",
+  //   type: "olympiad",
+  //   color: "#f59e0b",
+  // },
   {
     id: "4",
     name: "Financed Emission Computation",
@@ -340,6 +350,26 @@ export function DashboardLayout() {
         return <EmissionChartWrapper/>
       case "db2-CountryChart":
         return <CountryPieChartWrapper/>
+      case "db2-usertable":
+        return <UserTableDb2/>
+      case "db2-lo":
+        return <LoQuestionPage/>
+      case "db2-scr":
+        return <QuestionPage/>
+      case "db2-flash":
+        return <FlashTable/>
+      case "db2-flash-question":
+        return <FlashcardPage/>
+      case "db2-note":
+        return <ChapterListPage/>
+      case "db2-reg-track":
+        return <RegistrationDb2Wrapper/>
+      case "db2-scr-stats":
+        return <SCRStats/>
+      case "db2-lo-stats":
+        return <LoStats/>
+      case "db2-contact":
+        return <ContactMessageTable/>
       default:
         return <PlaceholderContent contentType={activeContent} />;
     }
