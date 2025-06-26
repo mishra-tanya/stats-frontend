@@ -32,6 +32,16 @@ import { RegistrationDb2Wrapper } from "./content/db2/RegTrack";
 import { LoStats } from "./content/db2/LoStats";
 import { SCRStats } from "./content/db2/ScrStats";
 import { ContactMessageTable } from "./content/db2/Contact";
+import Notfound from "./content/db3/Notfound";
+import GoalWiseCompletionChart from "./content/db3/GoalPie";
+import GoalCompletionByClassChart from "./content/db3/AllGoalPie";
+import ClassWiseUsersChart from "./content/db3/ClassPie";
+import { PaymentTable } from "./content/db3/Payment";
+import CertificateAreaChartWrapper from "./content/db3/CertificateChart";
+import PaymentAreaChartWrapper from "./content/db3/PaymentChart";
+import { UserTableDb3 } from "./content/db3/UserDb3";
+import { SiteAnalyticsTable } from "./content/Site";
+import { CityCountryUsersTable } from "./content/City";
 
 // Mock data for different website types
 const mockWebsites: Website[] = [
@@ -47,12 +57,12 @@ const mockWebsites: Website[] = [
     type: "scr",
     color: "#10b981",
   },
-  // {
-  //   id: "3",
-  //   name: "Sustainability Olympiad",
-  //   type: "olympiad",
-  //   color: "#f59e0b",
-  // },
+  {
+    id: "3",
+    name: "Sustainability Olympiad",
+    type: "olympiad",
+    color: "#f59e0b",
+  },
   {
     id: "4",
     name: "Financed Emission Computation",
@@ -370,6 +380,46 @@ export function DashboardLayout() {
         return <LoStats/>
       case "db2-contact":
         return <ContactMessageTable/>
+      case "db3-app":
+        return <Notfound/>
+      case "goal-completion":
+        return <GoalWiseCompletionChart/>
+      case "all-goal-completion":
+        return <GoalCompletionByClassChart/>
+      case "track-class":
+        return <ClassWiseUsersChart/>
+      case "countries-db3":
+        return <Notfound/>
+      case "results-db3":
+        return <Notfound/>
+      case "payments_db3":
+        return <PaymentAreaChartWrapper/>
+      case "certification":
+        return <CertificateAreaChartWrapper/>
+      case "users-db3":
+        return <UserTableDb3/>
+      case "question-db3":
+        return <Notfound/>
+      case "goal-db3":
+        return <Notfound/>
+      case "goal-test-db3":
+        return <Notfound/>
+      case "site-count-db1":
+        return <SiteAnalyticsTable site="site1"/>
+      case "country-db1":
+        return <CityCountryUsersTable site="site1"/>
+      case "site-count-db2":
+        return <SiteAnalyticsTable site="site2"/>
+      case "country-db2":
+        return <CityCountryUsersTable site="site2"/>
+      case "site-count-db3":
+        return <SiteAnalyticsTable site="site3"/>
+      case "country-db3":
+        return <CityCountryUsersTable site="site3"/>
+      case "site-count-db4":
+        return <SiteAnalyticsTable site="site4"/>
+      case "country-db4":
+        return <CityCountryUsersTable site="site4"/>
       default:
         return <PlaceholderContent contentType={activeContent} />;
     }

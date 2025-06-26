@@ -193,14 +193,14 @@ export function NotificationsPanel() {
           </div>
         </ScrollArea>
 
-        <div className="p-3 border-t bg-muted/30">
+        {/* <div className="p-3 border-t bg-muted/30">
           <Button
             variant="ghost"
             className="w-full h-8 text-xs text-muted-foreground hover:text-foreground"
           >
             View all notifications
           </Button>
-        </div>
+        </div> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
