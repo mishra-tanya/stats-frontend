@@ -6,8 +6,6 @@ import {
   Mail,
   Lock,
   Sparkles,
-  Github,
-  Chrome,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import apiClient from "@/services/axios";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,20 +27,37 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   });
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
+  try {
+    const response = await apiClient.post("login", {
+      email: formData.email,
+      password: formData.password,
+    });
+
+    console.log('Full response:', response);
+
+    const { user } = response.data.data || {};
+
+    if (user && user.role === 'admin') {
+      localStorage.setItem("auth_user", JSON.stringify(user));
       navigate("/dashboard");
-    }, 2000);
-  };
+    } else {
+      alert("Access denied. Admins only.");
+    }
+
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Invalid credentials");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-blue-950/20 dark:to-purple-950/20 p-4">
@@ -65,7 +80,7 @@ const Login = () => {
             Welcome Back
           </h1>
           <p className="text-muted-foreground mt-2">
-            Sign in to your Mutli Dashboard account
+            Sign in to your Multi Dashboard account
           </p>
         </div>
 
@@ -79,8 +94,10 @@ const Login = () => {
               Enter your credentials to access your dashboard
             </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email Field */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium">
                   Email Address
@@ -101,6 +118,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Password Field */}
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium">
                   Password
@@ -134,6 +152,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
                 className={cn(
@@ -141,7 +160,7 @@ const Login = () => {
                   "bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500",
                   "hover:from-blue-600 hover:via-purple-600 hover:to-pink-600",
                   "shadow-lg hover:shadow-xl transform hover:scale-[1.02]",
-                  isLoading && "opacity-50 cursor-not-allowed",
+                  isLoading && "opacity-50 cursor-not-allowed"
                 )}
                 disabled={isLoading}
               >
@@ -156,30 +175,8 @@ const Login = () => {
               </Button>
             </form>
 
-            {/* Demo Credentials */}
-            <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-xs text-muted-foreground text-center mb-2 font-medium">
-                Demo Credentials
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="text-center">
-                  <p className="font-mono text-blue-600 dark:text-blue-400">
-                    admin@dashboard.app
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="font-mono text-purple-600 dark:text-purple-400">
-                    password123
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
           </CardContent>
         </Card>
-
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import useFetch from "@/hooks/useFetch";
-import { format, isToday, subDays, parseISO } from "date-fns";
+import { format, parseISO, isToday, subDays } from "date-fns";
 
 const convertToCSV = (data: any[]) => {
   const headers = ["#", "Name", "Email", "School", "Class", "Registered At"];
@@ -19,23 +19,6 @@ const convertToCSV = (data: any[]) => {
   ].join("\n");
 };
 
-const filterByDateRange = (data: any[], range: string) => {
-  const now = new Date();
-  return data.filter((user) => {
-    const createdAt = parseISO(user.created_at);
-    switch (range) {
-      case "today":
-        return isToday(createdAt);
-      case "7":
-        return createdAt >= subDays(now, 7);
-      case "30":
-        return createdAt >= subDays(now, 30);
-      default:
-        return true;
-    }
-  });
-};
-
 export function UserTableDb3() {
   const { data, loading, error } = useFetch<any>("db3/users");
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,20 +26,75 @@ export function UserTableDb3() {
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [results, setResults] = useState<Record<number, any[]>>({});
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [sortLatestFirst, setSortLatestFirst] = useState(true);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const filterByDateRange = (data: any[]) => {
+    const now = new Date();
+
+    return data.filter((user) => {
+      const createdAt = parseISO(user.created_at);
+
+      if (fromDate && toDate) {
+        const from = new Date(fromDate);
+        const to = new Date(toDate);
+        return createdAt >= from && createdAt <= to;
+      }
+
+      switch (filterRange) {
+      case "today":
+        return isToday(createdAt);
+      case "yesterday":
+        const yesterday = subDays(now, 1);
+        return (
+          createdAt.toDateString() === yesterday.toDateString()
+        );
+      case "7":
+        return createdAt >= subDays(now, 7);
+      case "15":
+        return createdAt >= subDays(now, 15);
+      case "30":
+        return createdAt >= subDays(now, 30);
+      case "90":
+        return createdAt >= subDays(now, 90);
+      case "180":
+        return createdAt >= subDays(now, 180);
+      case "365":
+        return createdAt >= subDays(now, 365);
+      default:
+        return true;
+    }
+
+    });
+  };
 
   useEffect(() => {
     if (data) {
-      const filteredByDate = filterByDateRange(data, filterRange);
       const lower = searchTerm.toLowerCase();
-      const filtered = filteredByDate.filter((user: any) =>
+      let filtered = filterByDateRange(data).filter((user: any) =>
         user.name?.toLowerCase().includes(lower) ||
         user.email?.toLowerCase().includes(lower) ||
         user.class?.toLowerCase().includes(lower) ||
         user.school?.toLowerCase().includes(lower)
       );
+
+      filtered = filtered.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortLatestFirst ? dateB - dateA : dateA - dateB;
+      });
+
       setFilteredData(filtered);
     }
-  }, [data, searchTerm, filterRange]);
+  }, [data, searchTerm, filterRange, fromDate, toDate, sortLatestFirst]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterRange("all");
+    setFromDate("");
+    setToDate("");
+  };
 
   const downloadCSV = () => {
     const csv = convertToCSV(filteredData);
@@ -84,13 +122,7 @@ export function UserTableDb3() {
       const res = await fetch(`/db3/results/${userId}`);
       const json = await res.json();
       const resultData = Array.isArray(json) ? json : json.data;
-console.log(resultData);
-      if (Array.isArray(resultData)) {
-        setResults((prev) => ({ ...prev, [userId]: resultData }));
-      } else {
-        setResults((prev) => ({ ...prev, [userId]: [] }));
-      }
-
+      setResults((prev) => ({ ...prev, [userId]: resultData || [] }));
       setExpandedRow(userId);
     } catch (err) {
       console.error("Error fetching results", err);
@@ -123,27 +155,57 @@ console.log(resultData);
           Registered Users
         </h2>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-wrap items-center gap-4 mb-4">
           <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-1/2 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
+            className="w-full sm:w-1/3 px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
           />
           <select
             value={filterRange}
             onChange={(e) => setFilterRange(e.target.value)}
             className="px-3 py-2 rounded border border-violet-300"
           >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="7">Last 7 Days</option>
-            <option value="30">Last 30 Days</option>
+             <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="7">Last 7 Days</option>
+              <option value="15">Last 15 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 3 Months</option>
+              <option value="180">Last 6 Months</option>
+              <option value="365">Last 1 Year</option>
           </select>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="px-3 py-2 border border-violet-300 rounded-lg"
+          />
+          <span>to</span>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="px-3 py-2 border border-violet-300 rounded-lg"
+          />
+          <button
+            onClick={() => setSortLatestFirst(!sortLatestFirst)}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+          >
+            Sort: {sortLatestFirst ? "Latest → Oldest" : "Oldest → Latest"}
+          </button>
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          >
+            Clear Filters
+          </button>
           <button
             onClick={downloadCSV}
-            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+            className="px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700"
           >
             Download CSV
           </button>
@@ -153,13 +215,13 @@ console.log(resultData);
           <table className="min-w-full text-sm text-left">
             <thead className="bg-violet-50 dark:bg-violet-900/40 border-b-2 border-dashed border-violet-300 dark:border-violet-700">
               <tr>
-                <th className="px-4 py-2 text-violet-700">#</th>
-                <th className="px-4 py-2 text-fuchsia-700">Name</th>
-                <th className="px-4 py-2 text-purple-700">Email</th>
-                <th className="px-4 py-2 text-purple-700">School</th>
-                <th className="px-4 py-2 text-purple-700">Class</th>
-                <th className="px-4 py-2 text-violet-700">Registered At</th>
-                <th className="px-4 py-2 text-violet-700">Actions</th>
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Email</th>
+                <th className="px-4 py-2">School</th>
+                <th className="px-4 py-2">Class</th>
+                <th className="px-4 py-2">Registered At</th>
+                {/* <th className="px-4 py-2">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -174,14 +236,14 @@ console.log(resultData);
                     <td className="px-4 py-2 font-mono">
                       {format(parseISO(user.created_at), "yyyy-MM-dd")}
                     </td>
-                    <td className="px-4 py-2">
+                    {/* <td className="px-4 py-2">
                       <button
                         onClick={() => fetchResults(user.id)}
                         className="text-sm text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded"
                       >
                         {expandedRow === user.id ? "Hide Results" : "Show Results"}
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                   {expandedRow === user.id && (
                     <tr className="bg-purple-50/40">

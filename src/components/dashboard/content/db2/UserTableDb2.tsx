@@ -18,23 +18,87 @@ function convertToCSV(data: any[]) {
   return [headers.join(","), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(","))].join("\n");
 }
 
+function filterByDate(data: any[], range: string, fromDate: string, toDate: string) {
+  const today = new Date();
+
+  return data.filter((user) => {
+    const createdAt = new Date(user.created_at);
+
+    if (fromDate && toDate) {
+      return createdAt >= new Date(fromDate) && createdAt <= new Date(toDate);
+    }
+
+    switch (range) {
+      case "today":
+        return createdAt.toDateString() === today.toDateString();
+      case "yesterday":
+        const y = new Date(today);
+        y.setDate(today.getDate() - 1);
+        return createdAt.toDateString() === y.toDateString();
+      case "last_7_days":
+        const last7 = new Date(today);
+        last7.setDate(today.getDate() - 7);
+        return createdAt >= last7;
+      case "last_15_days":
+        const last15 = new Date(today);
+        last15.setDate(today.getDate() - 15);
+        return createdAt >= last15;
+      case "last_month":
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        return createdAt >= lastMonth;
+      case "last_3_months":
+        const last3 = new Date(today);
+        last3.setMonth(today.getMonth() - 3);
+        return createdAt >= last3;
+      case "last_6_months":
+        const last6 = new Date(today);
+        last6.setMonth(today.getMonth() - 6);
+        return createdAt >= last6;
+      case "last_year":
+        const lastYear = new Date(today);
+        lastYear.setFullYear(today.getFullYear() - 1);
+        return createdAt >= lastYear;
+      default:
+        return true;
+    }
+  });
+}
+
 export function UserTableDb2() {
   const { data, loading, error } = useFetch<any>("db2/users");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [dateRange, setDateRange] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     if (data) {
-      const term = searchTerm.toLowerCase();
-      const filtered = data.filter(
-        (user: any) =>
-          user.first_name?.toLowerCase().includes(term) ||
-          user.last_name?.toLowerCase().includes(term) ||
-          user.email?.toLowerCase().includes(term)
-      );
-      setFilteredData(filtered);
+      let result = data;
+
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        result = result.filter(
+          (user: any) =>
+            user.first_name?.toLowerCase().includes(term) ||
+            user.last_name?.toLowerCase().includes(term) ||
+            user.email?.toLowerCase().includes(term)
+        );
+      }
+
+      result = filterByDate(result, dateRange, fromDate, toDate);
+
+      result.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+
+      setFilteredData(result);
     }
-  }, [searchTerm, data]);
+  }, [searchTerm, data, dateRange, fromDate, toDate, sortOrder]);
 
   const downloadCSV = () => {
     const csv = convertToCSV(filteredData);
@@ -47,12 +111,20 @@ export function UserTableDb2() {
     document.body.removeChild(link);
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setDateRange("all");
+    setFromDate("");
+    setToDate("");
+    setSortOrder("desc");
+  };
+
   if (loading) return <p className="p-4">Loading...</p>;
   if (error) return <p className="p-4 text-red-500">Error: {error}</p>;
 
   return (
     <div className="relative p-6 overflow-x-auto">
-      {/* Decorative Background */}
+      {/* Background */}
       <div className="absolute inset-0 opacity-5 z-0" style={{
         backgroundImage: `
           radial-gradient(circle at 20% 20%, violet 2px, transparent 2px),
@@ -69,14 +141,63 @@ export function UserTableDb2() {
           User Directory
         </h2>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-wrap gap-4 mb-4 items-center">
           <input
             type="text"
             placeholder="Search by name or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-2/3 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
+            className="w-full sm:w-1/3 px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
           />
+
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+          >
+            <option value="all">All</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last_7_days">Last 7 Days</option>
+            <option value="last_15_days">Last 15 Days</option>
+            <option value="last_month">Last 1 Month</option>
+            <option value="last_3_months">Last 3 Months</option>
+            <option value="last_6_months">Last 6 Months</option>
+            <option value="last_year">Last 1 Year</option>
+          </select>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="px-3 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+            />
+            <span className="text-gray-500">to</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="px-3 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+            />
+          </div>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+          >
+            Clear Filters
+          </button>
+
           <button
             onClick={downloadCSV}
             className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
@@ -89,16 +210,9 @@ export function UserTableDb2() {
           <table className="min-w-full text-sm text-left">
             <thead className="bg-violet-50 dark:bg-violet-900/40 border-b-2 border-dashed border-violet-300 dark:border-violet-700">
               <tr>
-                <th className="px-4 py-2 font-bold text-violet-700 dark:text-violet-300">#</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">First Name</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Last Name</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Address</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Country</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Designation</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Email</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">SCR</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Learning Obj</th>
-                <th className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">Joined On</th>
+                {["#", "First Name", "Last Name", "Address", "Country", "Designation", "Email", "SCR", "Learning Obj", "Joined On"].map((head, i) => (
+                  <th key={i} className="px-4 py-2 font-bold text-purple-700 dark:text-purple-300">{head}</th>
+                ))}
               </tr>
             </thead>
             <tbody>

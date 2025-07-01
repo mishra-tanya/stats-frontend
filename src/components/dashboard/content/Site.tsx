@@ -20,6 +20,8 @@ function convertToCSV(data: any[]) {
 
 export function SiteAnalyticsTable({ site }: { site: string }) {
   const [range, setRange] = useState("today");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [url, setUrl] = useState(`analytics/site/${site}?range=${range}`);
   const { data, loading, error } = useFetch<any[]>(url);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,8 +30,12 @@ export function SiteAnalyticsTable({ site }: { site: string }) {
 
   useEffect(() => {
     setLocalLoading(true);
-    setUrl(`analytics/site/${site}?range=${range}`);
-  }, [range, site]);
+    if (fromDate && toDate) {
+      setUrl(`analytics/site/${site}?from=${fromDate}&to=${toDate}`);
+    } else {
+      setUrl(`analytics/site/${site}?range=${range}`);
+    }
+  }, [range, site, fromDate, toDate]);
 
   useEffect(() => {
     if (data) {
@@ -50,6 +56,13 @@ export function SiteAnalyticsTable({ site }: { site: string }) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const clearFilters = () => {
+    setFromDate("");
+    setToDate("");
+    setRange("today");
+    setSearchTerm("");
   };
 
   return (
@@ -78,26 +91,63 @@ export function SiteAnalyticsTable({ site }: { site: string }) {
         </h2>
 
         {/* Controls */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 flex-wrap">
           <input
             type="text"
             placeholder="Search by URL..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-2/3 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
+            className="w-full sm:w-1/3 px-4 py-2 border border-violet-300 rounded-lg"
           />
+
           <select
             value={range}
-            onChange={(e) => setRange(e.target.value)}
-            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+            onChange={(e) => {
+              setRange(e.target.value);
+              setFromDate("");
+              setToDate("");
+            }}
+            className="px-4 py-2 border border-violet-300 rounded-lg"
           >
             {RANGE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
+
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => {
+                setFromDate(e.target.value);
+                setRange("");
+              }}
+              className="px-3 py-2 border border-violet-300 rounded-lg"
+            />
+            <span className="self-center">to</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => {
+                setToDate(e.target.value);
+                setRange("");
+              }}
+              className="px-3 py-2 border border-violet-300 rounded-lg"
+            />
+          </div>
+
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          >
+            Clear Filters
+          </button>
+
           <button
             onClick={downloadCSV}
-            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
           >
             Download CSV
           </button>

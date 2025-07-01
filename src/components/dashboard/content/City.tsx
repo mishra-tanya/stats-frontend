@@ -25,9 +25,22 @@ const dateRanges = [
 
 export function CityCountryUsersTable({ site }: { site: string }) {
   const [range, setRange] = useState("today");
-  const { data, loading, error } = useFetch<any[]>(`analytics/city/${site}?range=${range}`);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [url, setUrl] = useState(`analytics/city/${site}?range=${range}`);
+  const { data, loading, error } = useFetch<any[]>(url);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+
+  useEffect(() => {
+    let query = `analytics/city/${site}`;
+    if (fromDate && toDate) {
+      query += `?from=${fromDate}&to=${toDate}`;
+    } else {
+      query += `?range=${range}`;
+    }
+    setUrl(query);
+  }, [range, fromDate, toDate, site]);
 
   useEffect(() => {
     if (data) {
@@ -45,15 +58,20 @@ export function CityCountryUsersTable({ site }: { site: string }) {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", `city_country_users_${range}.csv`);
+    link.setAttribute("download", `city_country_users.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  const clearDates = () => {
+    setFromDate("");
+    setToDate("");
+  };
+
   return (
     <div className="relative p-6 overflow-x-auto">
-      {/* Animated Background */}
+      {/* Background Effects */}
       <div
         className="absolute inset-0 opacity-5 z-0"
         style={{
@@ -70,7 +88,7 @@ export function CityCountryUsersTable({ site }: { site: string }) {
       <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-violet-400/20 to-transparent rounded-br-full z-0" />
       <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-fuchsia-400/20 to-transparent rounded-tl-full z-0" />
 
-      {/* Header + Controls */}
+      {/* Header and Controls */}
       <div className="relative z-10">
         <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 bg-clip-text text-transparent">
           Users by City & Country – {site}
@@ -82,17 +100,44 @@ export function CityCountryUsersTable({ site }: { site: string }) {
             placeholder="Search city or country..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-1/2 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
+            className="w-full sm:w-1/3 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
           />
           <select
             value={range}
-            onChange={(e) => setRange(e.target.value)}
+            onChange={(e) => {
+              setRange(e.target.value);
+              clearDates(); // Reset date pickers if range selected
+            }}
             className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
           >
             {dateRanges.map((r) => (
               <option key={r.value} value={r.value}>{r.label}</option>
             ))}
           </select>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              setRange(""); // clear range dropdown if manual date is picked
+            }}
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              setRange(""); // clear range dropdown if manual date is picked
+            }}
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+          />
+          <button
+            onClick={clearDates}
+            className="px-3 py-2 text-sm bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+          >
+            Clear Dates
+          </button>
           <button
             onClick={downloadCSV}
             className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
@@ -101,7 +146,7 @@ export function CityCountryUsersTable({ site }: { site: string }) {
           </button>
         </div>
 
-        {/* Table Display */}
+        {/* Data Table */}
         {loading && <p className="p-4">Loading...</p>}
         {error && <p className="p-4 text-red-500">Error: {error}</p>}
 

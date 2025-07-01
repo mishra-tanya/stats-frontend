@@ -25,24 +25,57 @@ function convertToCSV(data: ContactMessage[]) {
   return [headers.join(","), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(","))].join("\n");
 }
 
-function filterByDate(messages: ContactMessage[], range: string): ContactMessage[] {
+function filterByDate(
+  messages: ContactMessage[],
+  range: string,
+  fromDate: string,
+  toDate: string
+): ContactMessage[] {
   const today = new Date();
+
   return messages.filter((msg) => {
     const createdAt = new Date(msg.created_at);
-    if (range === "today") {
-      return createdAt.toDateString() === today.toDateString();
+
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      return createdAt >= from && createdAt <= to;
     }
-    if (range === "last_week") {
-      const lastWeek = new Date(today);
-      lastWeek.setDate(today.getDate() - 7);
-      return createdAt >= lastWeek;
+
+    switch (range) {
+      case "today":
+        return createdAt.toDateString() === today.toDateString();
+      case "yesterday":
+        const y = new Date(today);
+        y.setDate(today.getDate() - 1);
+        return createdAt.toDateString() === y.toDateString();
+      case "last_7_days":
+        const last7 = new Date(today);
+        last7.setDate(today.getDate() - 7);
+        return createdAt >= last7;
+      case "last_15_days":
+        const last15 = new Date(today);
+        last15.setDate(today.getDate() - 15);
+        return createdAt >= last15;
+      case "last_month":
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(today.getMonth() - 1);
+        return createdAt >= lastMonth;
+      case "last_3_months":
+        const last3 = new Date(today);
+        last3.setMonth(today.getMonth() - 3);
+        return createdAt >= last3;
+      case "last_6_months":
+        const last6 = new Date(today);
+        last6.setMonth(today.getMonth() - 6);
+        return createdAt >= last6;
+      case "last_year":
+        const lastYear = new Date(today);
+        lastYear.setFullYear(today.getFullYear() - 1);
+        return createdAt >= lastYear;
+      default:
+        return true;
     }
-    if (range === "last_month") {
-      const lastMonth = new Date(today);
-      lastMonth.setMonth(today.getMonth() - 1);
-      return createdAt >= lastMonth;
-    }
-    return true;
   });
 }
 
@@ -51,21 +84,36 @@ export function ContactMessageTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState<ContactMessage[]>([]);
   const [dateRange, setDateRange] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   useEffect(() => {
     if (data) {
-      const term = searchTerm.toLowerCase();
-      const filtered = data.filter(
-        (msg) =>
-          msg.name.toLowerCase().includes(term) ||
-          msg.email.toLowerCase().includes(term) ||
-          msg.subject.toLowerCase().includes(term) ||
-          msg.message.toLowerCase().includes(term)
-      );
-      const finalData = dateRange === "all" ? filtered : filterByDate(filtered, dateRange);
-      setFilteredData(finalData);
+      let result = data;
+
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        result = result.filter(
+          (msg) =>
+            msg.name.toLowerCase().includes(term) ||
+            msg.email.toLowerCase().includes(term) ||
+            msg.subject.toLowerCase().includes(term) ||
+            msg.message.toLowerCase().includes(term)
+        );
+      }
+
+      result = filterByDate(result, dateRange, fromDate, toDate);
+
+      result.sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+      });
+
+      setFilteredData(result);
     }
-  }, [searchTerm, data, dateRange]);
+  }, [searchTerm, data, dateRange, fromDate, toDate, sortOrder]);
 
   const downloadCSV = () => {
     const csv = convertToCSV(filteredData);
@@ -78,12 +126,19 @@ export function ContactMessageTable() {
     document.body.removeChild(link);
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setDateRange("all");
+    setFromDate("");
+    setToDate("");
+    setSortOrder("desc");
+  };
+
   if (loading) return <p className="p-4">Loading messages...</p>;
   if (error) return <p className="p-4 text-red-500">Error: {error}</p>;
 
   return (
     <div className="relative p-6 overflow-x-auto">
-      {/* Decorative Background */}
       <div className="absolute inset-0 opacity-5 z-0" style={{
         backgroundImage: `
           radial-gradient(circle at 20% 20%, violet 2px, transparent 2px),
@@ -100,24 +155,63 @@ export function ContactMessageTable() {
           Contact Messages
         </h2>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="flex flex-wrap gap-4 mb-4 items-center">
           <input
             type="text"
             placeholder="Search by name, email, or subject..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-2/3 px-4 py-2 border border-violet-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400 dark:bg-gray-800 dark:text-white"
+            className="w-full sm:w-1/3 px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
           />
+
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:text-white"
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
           >
             <option value="all">All</option>
             <option value="today">Today</option>
-            <option value="last_week">Last Week</option>
-            <option value="last_month">Last Month</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="last_7_days">Last 7 Days</option>
+            <option value="last_15_days">Last 15 Days</option>
+            <option value="last_month">Last 1 Month</option>
+            <option value="last_3_months">Last 3 Months</option>
+            <option value="last_6_months">Last 6 Months</option>
+            <option value="last_year">Last 1 Year</option>
           </select>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="px-3 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+            />
+            <span className="text-gray-500">to</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="px-3 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+            />
+          </div>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="px-4 py-2 border border-violet-300 rounded-lg dark:bg-gray-800 dark:text-white"
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+          >
+            Clear Filters
+          </button>
+
           <button
             onClick={downloadCSV}
             className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
@@ -143,7 +237,7 @@ export function ContactMessageTable() {
               {filteredData.map((msg, index) => (
                 <tr
                   key={msg.id}
-                  className={`transition-all duration-300 border-b border-dashed border-muted hover:scale-[1.01] hover:shadow-sm hover:bg-purple-50/50 dark:hover:bg-purple-950/20`}
+                  className="transition-all duration-300 border-b border-dashed border-muted hover:scale-[1.01] hover:shadow-sm hover:bg-purple-50/50 dark:hover:bg-purple-950/20"
                 >
                   <td className="px-4 py-2">{index + 1}</td>
                   <td className="px-4 py-2">{msg.name}</td>
